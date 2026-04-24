@@ -1,0 +1,107 @@
+@startuml diagrama-componentes
+title Sistema de Moeda Estudantil — Diagrama de Componentes
+
+skinparam componentStyle rectangle
+skinparam defaultFontSize 11
+skinparam nodeSep 50
+skinparam rankSep 70
+skinparam arrowColor #555555
+skinparam componentBorderColor #888888
+skinparam nodeBorderColor #555555
+skinparam nodeBackgroundColor #F5F5F5
+
+top to bottom direction
+
+' ─────────────────────────────────────────
+'  CAMADA 1 — FRONTEND
+' ─────────────────────────────────────────
+node "Frontend  (React + Vite + TypeScript)" as FE {
+  component [Módulos de Funcionalidade\nauth | aluno | professor | empresa | vantagens | extrato] as Modulos
+  component [Contexto de Autenticação] as AuthCtx
+  component [Componentes UI Compartilhados] as UIShared
+  component [Cliente HTTP (axios)] as HTTPCliente
+
+  Modulos -right-> AuthCtx
+  Modulos -down-> HTTPCliente
+  Modulos ..> UIShared : usa
+}
+
+' ─────────────────────────────────────────
+'  CAMADA 2 — INTERFACE HTTP
+' ─────────────────────────────────────────
+node "Camada HTTP  (Node.js + Express)" as HTTP_Layer {
+  component [Middleware JWT] as MidJWT
+  component [Middleware Validação (zod)] as MidVal
+  component [Controladores REST\nAuth | Aluno | Professor | Empresa | Vantagem | Extrato] as Controladores
+
+  MidJWT -right-> Controladores
+  MidVal -right-> Controladores
+}
+
+' ─────────────────────────────────────────
+'  CAMADA 3 — SERVIÇOS
+' ─────────────────────────────────────────
+node "Camada de Serviços  (Lógica de Negócio)" as SVC_Layer {
+  component [ServicoAuth] as SvcAuth
+  component [ServicoMoeda] as SvcMoeda
+  component [ServicoVantagem] as SvcVantagem
+  component [ServicoNotificacao] as SvcNotif
+
+  SvcMoeda -right-> SvcNotif
+  SvcVantagem -right-> SvcNotif
+}
+
+' ─────────────────────────────────────────
+'  CAMADA 4 — REPOSITÓRIOS
+' ─────────────────────────────────────────
+node "Camada de Repositórios  (Acesso a Dados)" as REPO_Layer {
+  component [RepositorioAluno] as RAl
+  component [RepositorioProfessor] as RPr
+  component [RepositorioTransferencia] as RTr
+  component [RepositorioVantagem] as RVa
+  component [RepositorioResgate] as RRe
+}
+
+' ─────────────────────────────────────────
+'  EXTERNOS
+' ─────────────────────────────────────────
+node "Serviços Externos" as Ext {
+  database "PostgreSQL" as DB
+  component [Adaptador Email (NodeMailer)] as Email
+  cloud "Servidor SMTP" as SMTP
+
+  Email -right-> SMTP
+}
+
+' ─────────────────────────────────────────
+'  CONEXÕES ENTRE CAMADAS
+' ─────────────────────────────────────────
+
+' Frontend → HTTP
+HTTPCliente -down-> Controladores : REST / JSON
+
+' HTTP → Serviços
+Controladores -down-> SvcAuth
+Controladores -down-> SvcMoeda
+Controladores -down-> SvcVantagem
+
+' Serviços → Repositórios
+SvcAuth     -down-> RAl
+SvcAuth     -down-> RPr
+SvcMoeda    -down-> RTr
+SvcMoeda    -down-> RAl
+SvcMoeda    -down-> RPr
+SvcVantagem -down-> RVa
+SvcVantagem -down-> RRe
+
+' Repositórios → BD
+RAl -down-> DB
+RPr -down-> DB
+RTr -down-> DB
+RVa -down-> DB
+RRe -down-> DB
+
+' Notificação → Email
+SvcNotif -down-> Email
+
+@enduml

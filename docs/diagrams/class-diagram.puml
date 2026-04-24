@@ -1,0 +1,143 @@
+@startuml diagrama-classes
+title Sistema de Moeda Estudantil — Diagrama de Classes
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam defaultFontSize 11
+
+' ─────────────────────────────────────────
+'  Enumerações
+' ─────────────────────────────────────────
+enum PapelUsuario {
+  ALUNO
+  PROFESSOR
+  EMPRESA_PARCEIRA
+}
+
+enum TipoTransacao {
+  TRANSFERENCIA_MOEDAS
+  RESGATE
+}
+
+' ─────────────────────────────────────────
+'  Objeto de Valor
+' ─────────────────────────────────────────
+class Endereco {
+  + logradouro: string
+  + cidade: string
+  + estado: string
+  + cep: string
+}
+
+' ─────────────────────────────────────────
+'  Entidades de Domínio
+' ─────────────────────────────────────────
+abstract class Usuario {
+  # id: string
+  # email: string
+  # senhaHash: string
+  # papel: PapelUsuario
+  # criadoEm: Date
+  + autenticar(senha: string): boolean
+}
+
+class Instituicao {
+  + id: string
+  + nome: string
+  + descricao: string
+}
+
+class Aluno {
+  + nome: string
+  + cpf: string
+  + rg: string
+  + endereco: Endereco
+  + curso: string
+  + saldoMoedas: number
+  + instituicao: Instituicao
+  + resgatarVantagem(vantagem: Vantagem): Resgate
+  + consultarExtrato(): Transacao[]
+  + deduzirSaldo(valor: number): void
+}
+
+class Professor {
+  + nome: string
+  + cpf: string
+  + departamento: string
+  + instituicao: Instituicao
+  + saldoMoedas: number
+  + enviarMoedas(aluno: Aluno, valor: number, motivo: string): TransferenciaMoedas
+  + receberAporte(valor: number): void
+  + consultarExtrato(): Transacao[]
+}
+
+class EmpresaParceira {
+  + nome: string
+  + descricao: string
+  + vantagens: Vantagem[]
+  + adicionarVantagem(vantagem: Vantagem): void
+  + removerVantagem(idVantagem: string): void
+}
+
+' ─────────────────────────────────────────
+'  Vantagem
+' ─────────────────────────────────────────
+class Vantagem {
+  + id: string
+  + nome: string
+  + descricao: string
+  + urlFoto: string
+  + custoMoedas: number
+  + ativa: boolean
+}
+
+' ─────────────────────────────────────────
+'  Transações
+' ─────────────────────────────────────────
+abstract class Transacao {
+  # id: string
+  # valor: number
+  # tipo: TipoTransacao
+  # realizadaEm: Date
+  # descricao: string
+}
+
+class TransferenciaMoedas {
+  + professor: Professor
+  + aluno: Aluno
+  + motivo: string
+}
+
+class Resgate {
+  + aluno: Aluno
+  + vantagem: Vantagem
+  + codigoCupom: string
+  + resgatadoEm: Date
+}
+
+' ─────────────────────────────────────────
+'  Relacionamentos
+' ─────────────────────────────────────────
+
+' Herança
+Usuario <|-- Aluno
+Usuario <|-- Professor
+Usuario <|-- EmpresaParceira
+Transacao <|-- TransferenciaMoedas
+Transacao <|-- Resgate
+
+' Associações
+Aluno "1" *-- "1" Endereco : contém
+Aluno "0..*" --> "1" Instituicao : "matriculado em"
+Professor "0..*" --> "1" Instituicao : "pertence a"
+EmpresaParceira "1" *-- "0..*" Vantagem : "oferece"
+
+TransferenciaMoedas "0..*" --> "1" Professor : "enviada por"
+TransferenciaMoedas "0..*" --> "1" Aluno : "recebida por"
+Resgate "0..*" --> "1" Aluno : "realizado por"
+Resgate "0..*" --> "1" Vantagem : "resgata"
+
+Usuario --> PapelUsuario
+Transacao --> TipoTransacao
+
+@enduml

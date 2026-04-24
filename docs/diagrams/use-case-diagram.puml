@@ -1,0 +1,89 @@
+@startuml diagrama-casos-de-uso
+title Sistema de Moeda Estudantil — Diagrama de Casos de Uso
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Aluno" as Aluno
+actor "Professor" as Professor
+actor "Empresa\nParceira" as Empresa
+actor "Sistema" as Sistema <<system>>
+
+rectangle "Sistema de Moeda Estudantil" {
+
+  package "Autenticação e Cadastro" {
+    usecase "UC01 - Cadastrar Aluno" as UC01
+    usecase "UC02 - Cadastrar Empresa Parceira" as UC02
+    usecase "UC03 - Autenticar no Sistema" as UC03
+  }
+
+  package "Gestão de Moedas" {
+    usecase "UC04 - Enviar Moedas ao Aluno" as UC04
+    usecase "UC05 - Consultar Extrato" as UC05
+    usecase "UC06 - Repor Saldo Semestral" as UC06
+  }
+
+  package "Vantagens" {
+    usecase "UC07 - Cadastrar Vantagem" as UC07
+    usecase "UC08 - Editar Vantagem" as UC08
+    usecase "UC09 - Listar Vantagens Disponíveis" as UC09
+    usecase "UC10 - Resgatar Vantagem" as UC10
+  }
+
+  package "Notificações" {
+    usecase "UC11 - Notificar Recebimento de Moedas" as UC11
+    usecase "UC12 - Enviar Cupom de Resgate ao Aluno" as UC12
+    usecase "UC13 - Notificar Empresa sobre Resgate" as UC13
+  }
+}
+
+' Aluno
+Aluno --> UC01
+Aluno --> UC03
+Aluno --> UC05
+Aluno --> UC09
+Aluno --> UC10
+
+' Professor
+Professor --> UC03
+Professor --> UC04
+Professor --> UC05
+
+' Empresa Parceira
+Empresa --> UC02
+Empresa --> UC03
+Empresa --> UC07
+Empresa --> UC08
+
+' Sistema automatizado
+Sistema --> UC06
+
+' Relacionamentos include
+UC04 ..> UC11 : <<include>>
+UC10 ..> UC12 : <<include>>
+UC10 ..> UC13 : <<include>>
+
+' Relacionamentos extend
+UC06 ..> UC04 : <<extend>>
+
+' Notas
+note right of UC04
+  Professor deve ter saldo
+  suficiente. Motivo é
+  campo obrigatório.
+end note
+
+note right of UC10
+  Saldo descontado do aluno.
+  Código de cupom único
+  gerado e enviado por email.
+end note
+
+note right of UC06
+  Executado automaticamente
+  a cada início de semestre.
+  Saldo é acumulativo.
+end note
+
+@enduml
