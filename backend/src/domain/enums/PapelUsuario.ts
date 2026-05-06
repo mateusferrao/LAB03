@@ -1,0 +1,5 @@
+export enum PapelUsuario {
+  ALUNO = 'ALUNO',
+  PROFESSOR = 'PROFESSOR',
+  EMPRESA_PARCEIRA = 'EMPRESA_PARCEIRA',
+}

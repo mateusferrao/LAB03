@@ -1,0 +1,163 @@
+// Prisma schema — Sistema de Moeda Estudantil
+// Strategy: table-per-class inheritance for Usuario hierarchy
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+//  Enums
+// ─────────────────────────────────────────
+
+enum PapelUsuario {
+  ALUNO
+  PROFESSOR
+  EMPRESA_PARCEIRA
+}
+
+// ─────────────────────────────────────────
+//  Base de autenticação (table-per-class)
+// ─────────────────────────────────────────
+
+model Usuario {
+  id        String       @id @default(uuid())
+  email     String       @unique
+  senhaHash String       @map("senha_hash")
+  papel     PapelUsuario
+  criadoEm DateTime     @default(now()) @map("criado_em")
+
+  aluno           Aluno?
+  professor       Professor?
+  empresaParceira EmpresaParceira?
+
+  @@map("usuarios")
+}
+
+// ─────────────────────────────────────────
+//  Instituição (pré-cadastrada por admin)
+// ─────────────────────────────────────────
+
+model Instituicao {
+  id        String @id @default(uuid())
+  nome      String
+  descricao String
+
+  alunos      Aluno[]
+  professores Professor[]
+
+  @@map("instituicoes")
+}
+
+// ─────────────────────────────────────────
+//  Perfis específicos
+// ─────────────────────────────────────────
+
+model Aluno {
+  id          String @id
+  usuario     Usuario @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  nome        String
+  cpf         String @unique
+  rg          String
+  logradouro  String
+  cidade      String
+  estado      String @db.Char(2)
+  cep         String @db.VarChar(9)
+  curso       String
+  saldoMoedas Int    @default(0) @map("saldo_moedas")
+
+  instituicaoId String      @map("instituicao_id")
+  instituicao   Instituicao @relation(fields: [instituicaoId], references: [id])
+
+  transferenciasRecebidas TransferenciaMoedas[]
+  resgates                Resgate[]
+
+  @@map("alunos")
+}
+
+model Professor {
+  id          String @id
+  usuario     Usuario @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  nome        String
+  cpf         String @unique
+  departamento String
+  saldoMoedas Int    @default(1000) @map("saldo_moedas")
+
+  instituicaoId String      @map("instituicao_id")
+  instituicao   Instituicao @relation(fields: [instituicaoId], references: [id])
+
+  transferenciasEnviadas TransferenciaMoedas[]
+
+  @@map("professores")
+}
+
+model EmpresaParceira {
+  id       String @id
+  usuario  Usuario @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  nome      String
+  descricao String
+
+  vantagens Vantagem[]
+
+  @@map("empresas_parceiras")
+}
+
+// ─────────────────────────────────────────
+//  Catálogo de vantagens
+// ─────────────────────────────────────────
+
+model Vantagem {
+  id          String @id @default(uuid())
+  empresaId   String @map("empresa_id")
+  empresa     EmpresaParceira @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  nome        String
+  descricao   String
+  urlFoto     String @map("url_foto")
+  custoMoedas Int    @map("custo_moedas")
+  ativa       Boolean @default(true)
+
+  resgates Resgate[]
+
+  @@map("vantagens")
+}
+
+// ─────────────────────────────────────────
+//  Transações
+// ─────────────────────────────────────────
+
+model TransferenciaMoedas {
+  id          String   @id @default(uuid())
+  professorId String   @map("professor_id")
+  professor   Professor @relation(fields: [professorId], references: [id])
+  alunoId     String   @map("aluno_id")
+  aluno       Aluno    @relation(fields: [alunoId], references: [id])
+
+  valor       Int
+  motivo      String
+  realizadaEm DateTime @default(now()) @map("realizada_em")
+
+  @@map("transferencias_moedas")
+}
+
+model Resgate {
+  id          String   @id @default(uuid())
+  alunoId     String   @map("aluno_id")
+  aluno       Aluno    @relation(fields: [alunoId], references: [id])
+  vantagemId  String   @map("vantagem_id")
+  vantagem    Vantagem @relation(fields: [vantagemId], references: [id])
+
+  codigoCupom String   @unique @map("codigo_cupom")
+  valor       Int
+  resgatadoEm DateTime @default(now()) @map("resgatado_em")
+
+  @@map("resgates")
+}

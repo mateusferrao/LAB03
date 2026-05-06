@@ -1,0 +1,129 @@
+@startuml diagrama-er
+title Sistema de Moeda Estudantil — Diagrama Entidade-Relacionamento
+
+skinparam linetype ortho
+skinparam defaultFontSize 11
+skinparam entity {
+  BackgroundColor #FFFDE7
+  BorderColor #F57F17
+}
+
+' ─────────────────────────────────────────
+'  Tabela base de autenticação
+' ─────────────────────────────────────────
+entity "usuarios" {
+  * id : UUID <<PK>>
+  --
+  * email : VARCHAR(255) <<UNIQUE>>
+  * senha_hash : VARCHAR(255)
+  * papel : ENUM(ALUNO, PROFESSOR, EMPRESA_PARCEIRA)
+  * criado_em : TIMESTAMP DEFAULT now()
+}
+
+' ─────────────────────────────────────────
+'  Perfis específicos por papel
+' ─────────────────────────────────────────
+entity "alunos" {
+  * id : UUID <<PK, FK → usuarios>>
+  --
+  * nome : VARCHAR(255)
+  * cpf : VARCHAR(14) <<UNIQUE>>
+  * rg : VARCHAR(20)
+  * logradouro : VARCHAR(255)
+  * cidade : VARCHAR(100)
+  * estado : CHAR(2)
+  * cep : VARCHAR(9)
+  * curso : VARCHAR(100)
+  * saldo_moedas : INTEGER DEFAULT 0
+  * instituicao_id : UUID <<FK → instituicoes>>
+}
+
+entity "professores" {
+  * id : UUID <<PK, FK → usuarios>>
+  --
+  * nome : VARCHAR(255)
+  * cpf : VARCHAR(14) <<UNIQUE>>
+  * departamento : VARCHAR(100)
+  * saldo_moedas : INTEGER DEFAULT 1000
+  * instituicao_id : UUID <<FK → instituicoes>>
+}
+
+entity "empresas_parceiras" {
+  * id : UUID <<PK, FK → usuarios>>
+  --
+  * nome : VARCHAR(255)
+  * descricao : TEXT
+}
+
+' ─────────────────────────────────────────
+'  Instituição (pré-cadastrada)
+' ─────────────────────────────────────────
+entity "instituicoes" {
+  * id : UUID <<PK>>
+  --
+  * nome : VARCHAR(255)
+  * descricao : TEXT
+}
+
+' ─────────────────────────────────────────
+'  Catálogo de vantagens
+' ─────────────────────────────────────────
+entity "vantagens" {
+  * id : UUID <<PK>>
+  --
+  * empresa_id : UUID <<FK → empresas_parceiras>>
+  * nome : VARCHAR(255)
+  * descricao : TEXT
+  * url_foto : VARCHAR(500)
+  * custo_moedas : INTEGER
+  * ativa : BOOLEAN DEFAULT true
+}
+
+' ─────────────────────────────────────────
+'  Transações
+' ─────────────────────────────────────────
+entity "transferencias_moedas" {
+  * id : UUID <<PK>>
+  --
+  * professor_id : UUID <<FK → professores>>
+  * aluno_id : UUID <<FK → alunos>>
+  * valor : INTEGER
+  * motivo : TEXT
+  * realizada_em : TIMESTAMP DEFAULT now()
+}
+
+entity "resgates" {
+  * id : UUID <<PK>>
+  --
+  * aluno_id : UUID <<FK → alunos>>
+  * vantagem_id : UUID <<FK → vantagens>>
+  * codigo_cupom : VARCHAR(50) <<UNIQUE>>
+  * valor : INTEGER
+  * resgatado_em : TIMESTAMP DEFAULT now()
+}
+
+' ─────────────────────────────────────────
+'  Relacionamentos
+' ─────────────────────────────────────────
+
+' Herança: usuario ← perfis específicos (table-per-class)
+usuarios ||--o| alunos           : "é um ▶"
+usuarios ||--o| professores      : "é um ▶"
+usuarios ||--o| empresas_parceiras : "é uma ▶"
+
+' Aluno e Professor pertencem a Instituição
+instituicoes ||--o{ alunos       : "matriculado em"
+instituicoes ||--o{ professores  : "pertence a"
+
+' Empresa possui vantagens
+empresas_parceiras ||--o{ vantagens : "oferece"
+
+' Transferências de moedas
+professores ||--o{ transferencias_moedas : "envia"
+alunos      ||--o{ transferencias_moedas : "recebe"
+
+' Resgates
+alunos    ||--o{ resgates : "realiza"
+vantagens ||--o{ resgates : "é resgatada em"
+
+@enduml

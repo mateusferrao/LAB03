@@ -1,0 +1,12 @@
+node_modules/
+dist/
+
+# Env — use .env.example as template
+.env
+.env.local
+
+# Prisma generated client (regenerated via prisma generate)
+node_modules/.prisma/
+
+# Logs
+*.log
