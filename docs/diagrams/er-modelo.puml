@@ -1,0 +1,45 @@
+@startuml modelo-er
+
+title Sistema de Moeda Estudantil — Modelo Entidade-Relacionamento
+
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BackgroundColor #FFFDE7
+  BorderColor #F57F17
+}
+
+rectangle "MODELO ER\nSistema de Moeda Estudantil" as modelo {
+}
+
+rectangle "Usuário\n\nAtributos:\n- id\n- email\n- senha_hash\n- papel\n- criado_em\n\nRegras:\n- id é PK\n- email é único\n- papel ∈ {ALUNO, PROFESSOR, EMPRESA_PARCEIRA}" as usuario
+
+rectangle "Aluno\n\nAtributos:\n- id\n- nome\n- cpf\n- rg\n- logradouro\n- cidade\n- estado\n- cep\n- curso\n- saldo_moedas\n- instituicao_id\n\nRegras:\n- id é PK e FK para Usuário\n- cpf é único\n- saldo_moedas inicia em 0" as aluno
+
+rectangle "Professor\n\nAtributos:\n- id\n- nome\n- cpf\n- departamento\n- saldo_moedas\n- instituicao_id\n\nRegras:\n- id é PK e FK para Usuário\n- cpf é único\n- saldo_moedas inicia em 1000" as professor
+
+rectangle "Empresa Parceira\n\nAtributos:\n- id\n- nome\n- descricao\n\nRegras:\n- id é PK e FK para Usuário" as empresa
+
+rectangle "Instituição\n\nAtributos:\n- id\n- nome\n- descricao\n\nRegras:\n- id é PK" as instituicao
+
+rectangle "Vantagem\n\nAtributos:\n- id\n- empresa_id\n- nome\n- descricao\n- url_foto\n- custo_moedas\n- ativa\n\nRegras:\n- id é PK\n- empresa_id é FK para Empresa Parceira\n- ativa inicia como true" as vantagem
+
+rectangle "Transferência de Moedas\n\nAtributos:\n- id\n- professor_id\n- aluno_id\n- valor\n- motivo\n- realizada_em\n\nRegras:\n- id é PK\n- professor_id é FK para Professor\n- aluno_id é FK para Aluno\n- realizada_em inicia com now()" as transferencia
+
+rectangle "Resgate\n\nAtributos:\n- id\n- aluno_id\n- vantagem_id\n- codigo_cupom\n- valor\n- resgatado_em\n\nRegras:\n- id é PK\n- aluno_id é FK para Aluno\n- vantagem_id é FK para Vantagem\n- codigo_cupom é único\n- resgatado_em inicia com now()" as resgate
+
+usuario "1" -- "0..1" aluno : possui perfil
+usuario "1" -- "0..1" professor : possui perfil
+usuario "1" -- "0..1" empresa : possui perfil
+
+instituicao "1" -- "N" aluno : matricula
+instituicao "1" -- "N" professor : possui
+
+empresa "1" -- "N" vantagem : oferece
+
+professor "1" -- "N" transferencia : envia
+aluno "1" -- "N" transferencia : recebe
+
+aluno "1" -- "N" resgate : realiza
+vantagem "1" -- "N" resgate : é resgatada em
+
+@enduml
