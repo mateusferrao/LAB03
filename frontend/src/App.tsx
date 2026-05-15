@@ -15,6 +15,7 @@ import { StatementPage } from './features/statement/StatementPage'
 import { DesignSystemPage } from './features/design-system/DesignSystemPage'
 import { SlidesPage } from './features/slides/SlidesPage'
 import { LeaderboardPage } from './features/leaderboard/LeaderboardPage'
+import type { Papel } from './types'
 
 // ── Nav config ───────────────────────────────────────────────────
 const NAV_COMMON = [
@@ -44,6 +45,8 @@ const NAV_ADMIN = [
   { to: '/professors',icon: '◈', label: 'Professores' },
 ]
 
+const CAN_VIEW_COMPANIES_AND_PROFESSORS: Papel[] = ['PROFESSOR', 'EMPRESA_PARCEIRA']
+
 const NAV_SYSTEM = [
   { to: '/design-system', icon: '◇', label: 'Design System' },
   { to: '/slides',        icon: '◇', label: 'Apresentação' },
@@ -68,6 +71,10 @@ function AppLayout() {
     user?.papel === 'ALUNO' ? 'Aluno' :
     user?.papel === 'PROFESSOR' ? 'Professor' :
     user?.papel === 'EMPRESA_PARCEIRA' ? 'Empresa Parceira' : ''
+
+  const adminNav = NAV_ADMIN.filter((item) =>
+    user?.papel !== 'ALUNO' || (item.to !== '/companies' && item.to !== '/professors'),
+  )
 
   return (
     <div className="app-layout">
@@ -103,7 +110,7 @@ function AppLayout() {
           )}
 
           <div className="nav-section-label" style={{ marginTop: 'var(--space-3)' }}>Administração</div>
-          {NAV_ADMIN.map((item) => (
+          {adminNav.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{item.icon}</span>
               {item.label}
@@ -168,10 +175,10 @@ function AppLayout() {
             <Route path="/students" element={<StudentListPage />} />
             <Route path="/students/new" element={<StudentFormPage />} />
             <Route path="/students/:id/edit" element={<StudentFormPage />} />
-            <Route path="/companies" element={<CompanyListPage />} />
-            <Route path="/companies/new" element={<CompanyFormPage />} />
-            <Route path="/companies/:id/edit" element={<CompanyFormPage />} />
-            <Route path="/professors" element={<ProfessorListPage />} />
+            <Route path="/companies" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><CompanyListPage /></RequireRole>} />
+            <Route path="/companies/new" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><CompanyFormPage /></RequireRole>} />
+            <Route path="/companies/:id/edit" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><CompanyFormPage /></RequireRole>} />
+            <Route path="/professors" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><ProfessorListPage /></RequireRole>} />
             <Route path="/transfer" element={<TransferPage />} />
             <Route path="/perks" element={<PerksPage />} />
             <Route path="/statement" element={<StatementPage />} />
@@ -196,6 +203,12 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
     </div>
   )
   if (!user) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+function RequireRole({ roles, children }: { roles: Papel[]; children: React.ReactNode }) {
+  const { user } = useAuth()
+  if (!user || !roles.includes(user.papel)) return <Navigate to="/" replace />
   return <>{children}</>
 }
 
