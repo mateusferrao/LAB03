@@ -45,7 +45,7 @@ const NAV_ADMIN = [
   { to: '/professors',icon: '◈', label: 'Professores' },
 ]
 
-const CAN_VIEW_COMPANIES_AND_PROFESSORS: Papel[] = ['PROFESSOR', 'EMPRESA_PARCEIRA']
+const CAN_VIEW_ADMIN: Papel[] = ['PROFESSOR', 'EMPRESA_PARCEIRA']
 
 const NAV_SYSTEM = [
   { to: '/design-system', icon: '◇', label: 'Design System' },
@@ -72,9 +72,7 @@ function AppLayout() {
     user?.papel === 'PROFESSOR' ? 'Professor' :
     user?.papel === 'EMPRESA_PARCEIRA' ? 'Empresa Parceira' : ''
 
-  const adminNav = NAV_ADMIN.filter((item) =>
-    user?.papel !== 'ALUNO' || (item.to !== '/companies' && item.to !== '/professors'),
-  )
+  const canViewAdmin = !!user && CAN_VIEW_ADMIN.includes(user.papel)
 
   return (
     <div className="app-layout">
@@ -109,13 +107,17 @@ function AppLayout() {
             </>
           )}
 
-          <div className="nav-section-label" style={{ marginTop: 'var(--space-3)' }}>Administração</div>
-          {adminNav.map((item) => (
-            <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-              <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </NavLink>
-          ))}
+          {canViewAdmin && (
+            <>
+              <div className="nav-section-label" style={{ marginTop: 'var(--space-3)' }}>Administração</div>
+              {NAV_ADMIN.map((item) => (
+                <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{item.icon}</span>
+                  {item.label}
+                </NavLink>
+              ))}
+            </>
+          )}
 
           <div className="nav-section-label" style={{ marginTop: 'var(--space-3)' }}>Documentação</div>
           {NAV_SYSTEM.map((item) => (
@@ -172,13 +174,13 @@ function AppLayout() {
         <div className="page-content">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
-            <Route path="/students" element={<StudentListPage />} />
-            <Route path="/students/new" element={<StudentFormPage />} />
-            <Route path="/students/:id/edit" element={<StudentFormPage />} />
-            <Route path="/companies" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><CompanyListPage /></RequireRole>} />
-            <Route path="/companies/new" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><CompanyFormPage /></RequireRole>} />
-            <Route path="/companies/:id/edit" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><CompanyFormPage /></RequireRole>} />
-            <Route path="/professors" element={<RequireRole roles={CAN_VIEW_COMPANIES_AND_PROFESSORS}><ProfessorListPage /></RequireRole>} />
+            <Route path="/students" element={<RequireRole roles={CAN_VIEW_ADMIN}><StudentListPage /></RequireRole>} />
+            <Route path="/students/new" element={<RequireRole roles={CAN_VIEW_ADMIN}><StudentFormPage /></RequireRole>} />
+            <Route path="/students/:id/edit" element={<RequireRole roles={CAN_VIEW_ADMIN}><StudentFormPage /></RequireRole>} />
+            <Route path="/companies" element={<RequireRole roles={CAN_VIEW_ADMIN}><CompanyListPage /></RequireRole>} />
+            <Route path="/companies/new" element={<RequireRole roles={CAN_VIEW_ADMIN}><CompanyFormPage /></RequireRole>} />
+            <Route path="/companies/:id/edit" element={<RequireRole roles={CAN_VIEW_ADMIN}><CompanyFormPage /></RequireRole>} />
+            <Route path="/professors" element={<RequireRole roles={CAN_VIEW_ADMIN}><ProfessorListPage /></RequireRole>} />
             <Route path="/transfer" element={<TransferPage />} />
             <Route path="/perks" element={<PerksPage />} />
             <Route path="/statement" element={<StatementPage />} />
