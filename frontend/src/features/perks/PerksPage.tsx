@@ -26,6 +26,7 @@ function AlunoPerks() {
   const [vantagens, setVantagens] = useState<Vantagem[]>([])
   const [loading, setLoading] = useState(true)
   const [redeeming, setRedeeming] = useState<string | null>(null)
+  const [confirmRedeem, setConfirmRedeem] = useState<Vantagem | null>(null)
   const [couponModal, setCouponModal] = useState<CouponModal | null>(null)
 
   useEffect(() => {
@@ -38,7 +39,7 @@ function AlunoPerks() {
 
   const saldo = user?.saldoMoedas ?? 0
 
-  async function handleRedeem(v: Vantagem) {
+  function handleRedeem(v: Vantagem) {
     if (v.custoMoedas > saldo) return toast.error('Saldo insuficiente para resgatar esta vantagem')
     if (!window.confirm(`Resgatar "${v.nome}" por ⬡ ${v.custoMoedas} moedas?`)) return
 

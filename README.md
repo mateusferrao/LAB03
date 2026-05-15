@@ -398,12 +398,17 @@ LAB03/
 │   ├── user-stories.md
 │   └── diagrams/
 │       ├── class-diagram.puml
+│       ├── class-diagram.svg
 │       ├── component-diagram.puml
+│       ├── component-diagram.svg
 │       ├── er-diagram.puml
 │       ├── er-diagram.pdf
+│       ├── er-diagram.svg
 │       ├── er-modelo.puml
 │       ├── er-modelo.pdf
-│       └── use-case-diagram.puml
+│       ├── er-modelo.svg
+│       ├── use-case-diagram.puml
+│       └── use-case-diagram.svg
 │
 ├── backend/
 │   ├── .env.example
@@ -568,6 +573,30 @@ O projeto possui documentação complementar em `docs/`:
 | [docs/diagrams/component-diagram.puml](docs/diagrams/component-diagram.puml) | Diagrama de componentes |
 | [docs/diagrams/er-diagram.puml](docs/diagrams/er-diagram.puml) | Diagrama entidade-relacionamento |
 | [docs/diagrams/er-diagram.pdf](docs/diagrams/er-diagram.pdf) | Versão PDF do DER |
+| [docs/diagrams/er-modelo.puml](docs/diagrams/er-modelo.puml) | Diagrama do modelo ER |
+| [docs/diagrams/er-modelo.pdf](docs/diagrams/er-modelo.pdf) | Versão PDF do modelo ER |
+
+### Pré-visualização dos diagramas
+
+#### Diagrama de casos de uso
+
+[![Diagrama de casos de uso](docs/diagrams/use-case-diagram.svg)](docs/diagrams/use-case-diagram.puml)
+
+#### Diagrama de classes
+
+[![Diagrama de classes](docs/diagrams/class-diagram.svg)](docs/diagrams/class-diagram.puml)
+
+#### Diagrama de componentes
+
+[![Diagrama de componentes](docs/diagrams/component-diagram.svg)](docs/diagrams/component-diagram.puml)
+
+#### Diagrama entidade-relacionamento
+
+[![Diagrama entidade-relacionamento](docs/diagrams/er-diagram.svg)](docs/diagrams/er-diagram.puml)
+
+#### Diagrama do modelo ER
+
+[![Diagrama do modelo ER](docs/diagrams/er-modelo.svg)](docs/diagrams/er-modelo.puml)
 
 ---
 
