@@ -8,7 +8,6 @@ Este projeto foi desenvolvido como trabalho prático da disciplina de **Projeto 
 
 ## 🚧 Status do Projeto
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
 ![License](https://img.shields.io/badge/license-academic-lightgrey)
 ![React](https://img.shields.io/badge/React-19.2.5-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-8.0.10-646CFF?logo=vite)
