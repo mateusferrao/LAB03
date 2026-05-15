@@ -1,4 +1,23 @@
-export interface Student {
+export type Papel = 'ALUNO' | 'PROFESSOR' | 'EMPRESA_PARCEIRA'
+
+export interface UsuarioAuth {
+  id: string
+  email: string
+  papel: Papel
+  nome?: string
+  saldoMoedas?: number
+  instituicao?: Instituicao
+  departamento?: string
+  descricao?: string
+}
+
+export interface Instituicao {
+  id: string
+  nome: string
+  descricao: string
+}
+
+export interface Aluno {
   id: string
   email: string
   nome: string
@@ -11,57 +30,81 @@ export interface Student {
   curso: string
   saldoMoedas: number
   instituicaoId: string
-  criadoEm: string
+  instituicao?: Instituicao
+  criadoEm?: string
 }
 
-export interface PartnerCompany {
+export interface Professor {
   id: string
   email: string
   nome: string
-  descricao: string
-  criadoEm: string
-}
-
-export interface Institution {
-  id: string
-  nome: string
-  descricao: string
-}
-
-export interface CreateStudentInput {
-  nome: string
-  email: string
-  senha: string
   cpf: string
-  rg: string
-  logradouro: string
-  cidade: string
-  estado: string
-  cep: string
-  curso: string
+  departamento: string
+  saldoMoedas: number
   instituicaoId: string
+  instituicao?: Instituicao
 }
 
-export interface UpdateStudentInput {
-  nome?: string
-  cpf?: string
-  rg?: string
-  logradouro?: string
-  cidade?: string
-  estado?: string
-  cep?: string
-  curso?: string
-  instituicaoId?: string
-}
-
-export interface CreateCompanyInput {
-  nome: string
+export interface EmpresaParceira {
+  id: string
   email: string
-  senha: string
+  nome: string
   descricao: string
+  criadoEm?: string
+  vantagens?: Vantagem[]
 }
 
-export interface UpdateCompanyInput {
-  nome?: string
-  descricao?: string
+export interface Vantagem {
+  id: string
+  empresaId: string
+  empresa?: EmpresaParceira
+  nome: string
+  descricao: string
+  urlFoto: string
+  custoMoedas: number
+  ativa: boolean
 }
+
+export interface Transferencia {
+  id: string
+  professorId: string
+  professor?: Professor
+  alunoId: string
+  aluno?: Aluno
+  valor: number
+  motivo: string
+  realizadaEm: string
+}
+
+export interface Resgate {
+  id: string
+  alunoId: string
+  aluno?: Aluno
+  vantagemId: string
+  vantagem?: Vantagem
+  codigoCupom: string
+  valor: number
+  resgatadoEm: string
+}
+
+export interface LeaderboardEntry {
+  posicao: number
+  nome: string
+  saldoMoedas: number
+  curso: string
+  instituicao: string
+}
+
+export interface Stats {
+  totalAlunos: number
+  totalProfessores: number
+  totalEmpresas: number
+  totalTransferencias: number
+  totalResgates: number
+  moedasCirculando: number
+}
+
+// Legacy aliases for backward compat
+export type Student = Aluno
+export type PartnerCompany = EmpresaParceira
+export type Institution = Instituicao

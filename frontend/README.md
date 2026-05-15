@@ -12,7 +12,7 @@ npm ci
 npm run dev
 ```
 
-Se estiver rodando fora do Docker, use `frontend/.env.local` com:
+Para apontar o front-end para a API local, use `frontend/.env.local` com:
 
 ```env
 VITE_API_URL=http://localhost:3000

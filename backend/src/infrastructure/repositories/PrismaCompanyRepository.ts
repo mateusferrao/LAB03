@@ -1,7 +1,7 @@
 import { IRepository } from '../../domain/interfaces/IRepository'
 import { PartnerCompany } from '../../domain/entities/PartnerCompany'
 import prisma from '../database/prisma'
-import { PapelUsuario } from '@prisma/client'
+import { PapelUsuario } from '../../domain/enums/PapelUsuario'
 import bcrypt from 'bcryptjs'
 
 export type CreateCompanyInput = Omit<PartnerCompany, 'id' | 'criadoEm'> & {

@@ -1,7 +1,7 @@
 import { IRepository } from '../../domain/interfaces/IRepository'
 import { Student } from '../../domain/entities/Student'
 import prisma from '../database/prisma'
-import { PapelUsuario } from '@prisma/client'
+import { PapelUsuario } from '../../domain/enums/PapelUsuario'
 import bcrypt from 'bcryptjs'
 
 export type CreateStudentInput = Omit<Student, 'id' | 'saldoMoedas' | 'criadoEm'> & {

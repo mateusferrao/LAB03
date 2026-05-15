@@ -10,12 +10,12 @@ Thumbs.db
 
 # Env files (never commit secrets)
 .env
-.env.local
-.env.*.local
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 
 # Logs
 *.log
 npm-debug.log*
-
-# Docker volumes (if compose uses local bind mounts)
-postgres_data/

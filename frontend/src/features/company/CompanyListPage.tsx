@@ -1,20 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  Table, Button, Space, Popconfirm, Typography,
-  Breadcrumb, Card, Input, App, Avatar,
-} from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ShopOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import type { PartnerCompany } from '../../types'
-import { listCompanies, deleteCompany } from '../../services/companyService'
-
-const { Title } = Typography
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
+import toast from 'react-hot-toast'
+import type { EmpresaParceira } from '../../types'
 
 export function CompanyListPage() {
   const navigate = useNavigate()
-  const { message } = App.useApp()
-  const [companies, setCompanies] = useState<PartnerCompany[]>([])
+  const [companies, setCompanies] = useState<EmpresaParceira[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -23,138 +15,137 @@ export function CompanyListPage() {
   async function load() {
     try {
       setLoading(true)
-      setCompanies(await listCompanies())
+      const { data } = await api.get<EmpresaParceira[]>('/companies')
+      setCompanies(data)
     } catch {
-      message.error('Erro ao carregar empresas')
+      toast.error('Erro ao carregar empresas')
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(company: EmpresaParceira) {
+    if (!window.confirm(`Deseja excluir "${company.nome}"? Todas as vantagens serão removidas.`)) return
     try {
-      await deleteCompany(id)
-      setCompanies((prev) => prev.filter((c) => c.id !== id))
-      message.success('Empresa excluída com sucesso')
+      await api.delete(`/companies/${company.id}`)
+      setCompanies((prev) => prev.filter((c) => c.id !== company.id))
+      toast.success('Empresa excluída com sucesso')
     } catch {
-      message.error('Erro ao excluir empresa')
+      toast.error('Erro ao excluir empresa')
     }
   }
 
-  const filtered = companies.filter(
-    (c) =>
-      c.nome.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()) ||
-      c.descricao.toLowerCase().includes(search.toLowerCase()),
+  const filtered = companies.filter((c) =>
+    c.nome.toLowerCase().includes(search.toLowerCase()) ||
+    c.email.toLowerCase().includes(search.toLowerCase()) ||
+    c.descricao.toLowerCase().includes(search.toLowerCase()),
   )
 
-  const columns: ColumnsType<PartnerCompany> = [
-    {
-      title: 'Empresa',
-      key: 'empresa',
-      sorter: (a, b) => a.nome.localeCompare(b.nome),
-      render: (_, record) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar
-            style={{ background: '#f0f5ff', color: '#1677ff', fontWeight: 700, flexShrink: 0 }}
-            size={36}
-          >
-            {record.nome.charAt(0).toUpperCase()}
-          </Avatar>
-          <div>
-            <div style={{ fontWeight: 500 }}>{record.nome}</div>
-            <div style={{ fontSize: 12, color: '#999' }}>{record.email}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Descrição',
-      dataIndex: 'descricao',
-      key: 'descricao',
-      ellipsis: true,
-      render: (desc: string) => (
-        <span style={{ color: '#555' }}>{desc}</span>
-      ),
-    },
-    {
-      title: 'Cadastro',
-      dataIndex: 'criadoEm',
-      key: 'criadoEm',
-      width: 150,
-      render: (date: string) =>
-        new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
-    },
-    {
-      title: 'Ações',
-      key: 'actions',
-      align: 'center',
-      width: 120,
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/companies/${record.id}/edit`)}
-          />
-          <Popconfirm
-            title="Excluir empresa"
-            description={`Deseja excluir "${record.nome}"? Todas as vantagens serão removidas.`}
-            onConfirm={() => handleDelete(record.id)}
-            okText="Excluir"
-            cancelText="Cancelar"
-            okButtonProps={{ danger: true }}
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ]
+  if (loading) {
+    return (
+      <div className="loading-screen" style={{ minHeight: 320 }}>
+        <div className="spinner" />
+        <span>Carregando empresas...</span>
+      </div>
+    )
+  }
 
   return (
     <div>
-      <Breadcrumb
-        items={[{ title: 'Início' }, { title: 'Empresas Parceiras' }]}
-        style={{ marginBottom: 16 }}
-      />
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <ShopOutlined style={{ fontSize: 20, color: '#52c41a' }} />
-          <Title level={4} style={{ margin: 0 }}>Empresas Parceiras</Title>
+      <div className="page-header">
+        <div>
+          <div className="page-super">Gestão do Sistema</div>
+          <h1 className="page-title">Empresas Parceiras</h1>
+          <div className="page-subtitle">Gerencie as empresas que oferecem vantagens aos alunos</div>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => navigate('/companies/new')}
-        >
-          Nova Empresa
-        </Button>
+        <button className="btn btn-primary" onClick={() => navigate('/companies/new')}>
+          + Nova Empresa
+        </button>
       </div>
 
-      <Card bordered={false} style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-        <div style={{ marginBottom: 16 }}>
-          <Input
+      <div className="card">
+        <div className="card-header" style={{ marginBottom: 'var(--space-4)' }}>
+          <input
+            className="form-input"
+            style={{ maxWidth: 380 }}
             placeholder="Buscar por nome, email ou descrição..."
-            prefix={<SearchOutlined style={{ color: '#bbb' }} />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            allowClear
-            style={{ maxWidth: 360 }}
           />
+          <span className="badge badge-green">{filtered.length} empresas</span>
         </div>
 
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={filtered}
-          loading={loading}
-          pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (t) => `${t} registros` }}
-          size="middle"
-          locale={{ emptyText: 'Nenhuma empresa encontrada' }}
-        />
-      </Card>
+        {filtered.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">◈</div>
+            <div className="empty-state-title">Nenhuma empresa encontrada</div>
+            <div className="empty-state-desc">
+              {search ? 'Tente uma busca diferente' : 'Cadastre a primeira empresa parceira'}
+            </div>
+            {!search && (
+              <button className="btn btn-primary" style={{ marginTop: 'var(--space-4)' }} onClick={() => navigate('/companies/new')}>
+                + Cadastrar Empresa
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Descrição</th>
+                  <th style={{ textAlign: 'center' }}>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((c) => (
+                  <tr key={c.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: '50%',
+                          background: 'var(--bg-elevated)', border: '1px solid var(--border-gold)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontFamily: 'var(--font-heading)', color: 'var(--gold-400)', fontWeight: 700, fontSize: '1rem', flexShrink: 0,
+                        }}>
+                          {c.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                          {c.nome}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{c.email}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.83rem' }}>
+                        {c.descricao.length > 60 ? c.descricao.slice(0, 60) + '…' : c.descricao}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-4" style={{ justifyContent: 'center' }}>
+                        <Link to={`/companies/${c.id}/edit`} className="btn btn-ghost btn-sm btn-icon" title="Editar">
+                          ✎
+                        </Link>
+                        <button
+                          className="btn btn-danger btn-sm btn-icon"
+                          title="Excluir"
+                          onClick={() => handleDelete(c)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

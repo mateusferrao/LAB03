@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\felip\\\\OneDrive\\\\Desktop\\\\Faculdade\\\\4-quarto-periodo\\\\projeto-de-software\\\\lab\\\\LAB03\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "Bash(del \"C:\\\\Users\\\\felip\\\\OneDrive\\\\Desktop\\\\Faculdade\\\\4-quarto-periodo\\\\projeto-de-software\\\\lab\\\\LAB03\\\\docker-compose.yml\")",
+      "Bash(del \"C:\\\\Users\\\\felip\\\\OneDrive\\\\Desktop\\\\Faculdade\\\\4-quarto-periodo\\\\projeto-de-software\\\\lab\\\\LAB03\\\\backend\\\\Dockerfile\")",
+      "Bash(del \"C:\\\\Users\\\\felip\\\\OneDrive\\\\Desktop\\\\Faculdade\\\\4-quarto-periodo\\\\projeto-de-software\\\\lab\\\\LAB03\\\\frontend\\\\Dockerfile\")",
+      "Bash(del \"C:\\\\Users\\\\felip\\\\OneDrive\\\\Desktop\\\\Faculdade\\\\4-quarto-periodo\\\\projeto-de-software\\\\lab\\\\LAB03\\\\frontend\\\\nginx.conf\")",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "Bash(sed -i \"s/^import { Instituicao } from '..\\\\/..\\\\/types'/import type { Instituicao } from '..\\\\/..\\\\/types'/\" features/auth/RegisterPage.tsx)",
+      "Bash(sed -i \"s/^import { EmpresaParceira, Vantagem } from '..\\\\/..\\\\/types'/import type { EmpresaParceira, Vantagem } from '..\\\\/..\\\\/types'/\" features/company/CompanyFormPage.tsx)",
+      "Bash(sed -i \"s/^import { EmpresaParceira } from '..\\\\/..\\\\/types'/import type { EmpresaParceira } from '..\\\\/..\\\\/types'/\" features/company/CompanyListPage.tsx)",
+      "Bash(sed -i \"s/^import { Stats, Transferencia, Resgate } from '..\\\\/..\\\\/types'/import type { Stats, Transferencia, Resgate } from '..\\\\/..\\\\/types'/\" features/dashboard/DashboardPage.tsx)",
+      "Bash(sed -i \"s/^import { LeaderboardEntry } from '..\\\\/..\\\\/types'/import type { LeaderboardEntry } from '..\\\\/..\\\\/types'/\" features/leaderboard/LeaderboardPage.tsx)",
+      "Bash(npm run *)",
+      "Bash(node -e 'const { PrismaClient } = require\\('\\\\''@prisma/client'\\\\''\\); const p = new PrismaClient\\(\\); p.usuario.count\\(\\).then\\(c => { console.log\\('\\\\''DB OK, usuarios:'\\\\'', c\\); p.$disconnect\\(\\); }\\).catch\\(e => console.error\\(e\\)\\)')"
+    ]
+  }
+}

@@ -1,20 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  Table, Button, Space, Popconfirm, Tag, Typography,
-  Breadcrumb, Card, Input, App,
-} from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import type { Student } from '../../types'
-import { listStudents, deleteStudent } from '../../services/studentService'
-
-const { Title } = Typography
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../../services/api'
+import toast from 'react-hot-toast'
+import type { Aluno } from '../../types'
 
 export function StudentListPage() {
   const navigate = useNavigate()
-  const { message } = App.useApp()
-  const [students, setStudents] = useState<Student[]>([])
+  const [students, setStudents] = useState<Aluno[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -23,141 +15,134 @@ export function StudentListPage() {
   async function load() {
     try {
       setLoading(true)
-      setStudents(await listStudents())
+      const { data } = await api.get<Aluno[]>('/students')
+      setStudents(data)
     } catch {
-      message.error('Erro ao carregar alunos')
+      toast.error('Erro ao carregar alunos')
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(student: Aluno) {
+    if (!window.confirm(`Deseja excluir "${student.nome}"? Esta ação não pode ser desfeita.`)) return
     try {
-      await deleteStudent(id)
-      setStudents((prev) => prev.filter((s) => s.id !== id))
-      message.success('Aluno excluído com sucesso')
+      await api.delete(`/students/${student.id}`)
+      setStudents((prev) => prev.filter((s) => s.id !== student.id))
+      toast.success('Aluno excluído com sucesso')
     } catch {
-      message.error('Erro ao excluir aluno')
+      toast.error('Erro ao excluir aluno')
     }
   }
 
-  const filtered = students.filter(
-    (s) =>
-      s.nome.toLowerCase().includes(search.toLowerCase()) ||
-      s.email.toLowerCase().includes(search.toLowerCase()) ||
-      s.curso.toLowerCase().includes(search.toLowerCase()),
+  const filtered = students.filter((s) =>
+    s.nome.toLowerCase().includes(search.toLowerCase()) ||
+    s.email.toLowerCase().includes(search.toLowerCase()) ||
+    s.curso.toLowerCase().includes(search.toLowerCase()),
   )
 
-  const columns: ColumnsType<Student> = [
-    {
-      title: 'Nome',
-      dataIndex: 'nome',
-      key: 'nome',
-      sorter: (a, b) => a.nome.localeCompare(b.nome),
-      render: (nome, record) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{nome}</div>
-          <div style={{ fontSize: 12, color: '#999' }}>{record.email}</div>
-        </div>
-      ),
-    },
-    {
-      title: 'CPF',
-      dataIndex: 'cpf',
-      key: 'cpf',
-      render: (cpf: string) =>
-        cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'),
-    },
-    {
-      title: 'Curso',
-      dataIndex: 'curso',
-      key: 'curso',
-    },
-    {
-      title: 'Cidade / UF',
-      key: 'local',
-      render: (_, r) => `${r.cidade} / ${r.estado}`,
-    },
-    {
-      title: 'Saldo',
-      dataIndex: 'saldoMoedas',
-      key: 'saldoMoedas',
-      align: 'right',
-      sorter: (a, b) => a.saldoMoedas - b.saldoMoedas,
-      render: (saldo: number) => (
-        <Tag color={saldo > 0 ? 'blue' : 'default'}>{saldo} MC</Tag>
-      ),
-    },
-    {
-      title: 'Ações',
-      key: 'actions',
-      align: 'center',
-      width: 120,
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/students/${record.id}/edit`)}
-          />
-          <Popconfirm
-            title="Excluir aluno"
-            description={`Deseja excluir "${record.nome}"? Esta ação não pode ser desfeita.`}
-            onConfirm={() => handleDelete(record.id)}
-            okText="Excluir"
-            cancelText="Cancelar"
-            okButtonProps={{ danger: true }}
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ]
+  if (loading) {
+    return (
+      <div className="loading-screen" style={{ minHeight: 320 }}>
+        <div className="spinner" />
+        <span>Carregando alunos...</span>
+      </div>
+    )
+  }
 
   return (
     <div>
-      <Breadcrumb
-        items={[{ title: 'Início' }, { title: 'Alunos' }]}
-        style={{ marginBottom: 16 }}
-      />
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <UserOutlined style={{ fontSize: 20, color: '#1677ff' }} />
-          <Title level={4} style={{ margin: 0 }}>Alunos</Title>
+      <div className="page-header">
+        <div>
+          <div className="page-super">Gestão Acadêmica</div>
+          <h1 className="page-title">Alunos Cadastrados</h1>
+          <div className="page-subtitle">Gerencie os alunos registrados no sistema de mérito</div>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => navigate('/students/new')}
-        >
-          Novo Aluno
-        </Button>
+        <button className="btn btn-primary" onClick={() => navigate('/students/new')}>
+          + Novo Aluno
+        </button>
       </div>
 
-      <Card bordered={false} style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-        <div style={{ marginBottom: 16 }}>
-          <Input
+      <div className="card">
+        <div className="card-header" style={{ marginBottom: 'var(--space-4)' }}>
+          <input
+            className="form-input"
+            style={{ maxWidth: 380 }}
             placeholder="Buscar por nome, email ou curso..."
-            prefix={<SearchOutlined style={{ color: '#bbb' }} />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            allowClear
-            style={{ maxWidth: 360 }}
           />
+          <span className="badge badge-gold">{filtered.length} alunos</span>
         </div>
 
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={filtered}
-          loading={loading}
-          pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (t) => `${t} registros` }}
-          size="middle"
-          locale={{ emptyText: 'Nenhum aluno encontrado' }}
-        />
-      </Card>
+        {filtered.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">◈</div>
+            <div className="empty-state-title">Nenhum aluno encontrado</div>
+            <div className="empty-state-desc">
+              {search ? 'Tente uma busca diferente' : 'Cadastre o primeiro aluno para começar'}
+            </div>
+            {!search && (
+              <button className="btn btn-primary" style={{ marginTop: 'var(--space-4)' }} onClick={() => navigate('/students/new')}>
+                + Cadastrar Aluno
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Curso</th>
+                  <th>Instituição</th>
+                  <th style={{ textAlign: 'right' }}>Saldo</th>
+                  <th style={{ textAlign: 'center' }}>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((s) => (
+                  <tr key={s.id}>
+                    <td>
+                      <div style={{ fontFamily: 'var(--font-heading)', fontSize: '0.88rem', color: 'var(--text-primary)' }}>{s.nome}</div>
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{s.email}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{s.curso}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{s.instituicao?.nome ?? '—'}</span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="coin-display" style={{ justifyContent: 'flex-end' }}>
+                        <div className="coin-icon" style={{ fontSize: '0.75rem' }}>⬡</div>
+                        <span className="coin-amount" style={{ fontSize: '0.9rem' }}>{s.saldoMoedas}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="flex items-center justify-between gap-4" style={{ justifyContent: 'center' }}>
+                        <Link to={`/students/${s.id}/edit`} className="btn btn-ghost btn-sm btn-icon" title="Editar">
+                          ✎
+                        </Link>
+                        <button
+                          className="btn btn-danger btn-sm btn-icon"
+                          title="Excluir"
+                          onClick={() => handleDelete(s)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

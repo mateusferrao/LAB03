@@ -1,91 +1,168 @@
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Typography, Avatar } from 'antd'
-import {
-  UserOutlined,
-  ShopOutlined,
-  DashboardOutlined,
-  TrophyOutlined,
-} from '@ant-design/icons'
+import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { LoginPage } from './features/auth/LoginPage'
+import { RegisterPage } from './features/auth/RegisterPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { StudentListPage } from './features/student/StudentListPage'
 import { StudentFormPage } from './features/student/StudentFormPage'
 import { CompanyListPage } from './features/company/CompanyListPage'
 import { CompanyFormPage } from './features/company/CompanyFormPage'
+import { ProfessorListPage } from './features/professor/ProfessorListPage'
+import { TransferPage } from './features/transfer/TransferPage'
+import { PerksPage } from './features/perks/PerksPage'
+import { StatementPage } from './features/statement/StatementPage'
+import { DesignSystemPage } from './features/design-system/DesignSystemPage'
+import { SlidesPage } from './features/slides/SlidesPage'
+import { LeaderboardPage } from './features/leaderboard/LeaderboardPage'
 
-const { Sider, Header, Content, Footer } = Layout
-
-const menuItems = [
-  { key: '/', label: 'Dashboard', icon: <DashboardOutlined /> },
-  { key: '/students', label: 'Alunos', icon: <UserOutlined /> },
-  { key: '/companies', label: 'Empresas Parceiras', icon: <ShopOutlined /> },
+// ── Nav config ───────────────────────────────────────────────────
+const NAV_COMMON = [
+  { to: '/',            icon: '◈', label: 'Painel Principal' },
+  { to: '/leaderboard', icon: '⬡', label: 'Ranking' },
 ]
 
-function AppShell() {
-  const navigate = useNavigate()
-  const location = useLocation()
+const NAV_ALUNO = [
+  { to: '/perks',     icon: '⬡', label: 'Vantagens' },
+  { to: '/statement', icon: '◉', label: 'Extrato' },
+]
 
-  const selectedKey =
-    menuItems.find((item) => item.key !== '/' && location.pathname.startsWith(item.key))?.key ??
-    (location.pathname === '/' ? '/' : '')
+const NAV_PROFESSOR = [
+  { to: '/students',  icon: '◈', label: 'Alunos' },
+  { to: '/transfer',  icon: '⬡', label: 'Enviar Moedas' },
+  { to: '/statement', icon: '◉', label: 'Meu Extrato' },
+]
+
+const NAV_EMPRESA = [
+  { to: '/perks',     icon: '⬡', label: 'Minhas Vantagens' },
+  { to: '/statement', icon: '◉', label: 'Resgates' },
+]
+
+const NAV_ADMIN = [
+  { to: '/students',  icon: '◈', label: 'Alunos' },
+  { to: '/companies', icon: '◈', label: 'Empresas' },
+  { to: '/professors',icon: '◈', label: 'Professores' },
+]
+
+const NAV_SYSTEM = [
+  { to: '/design-system', icon: '◇', label: 'Design System' },
+  { to: '/slides',        icon: '◇', label: 'Apresentação' },
+]
+
+// ── Layout ────────────────────────────────────────────────────────
+function AppLayout() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logout()
+    navigate('/login')
+  }
+
+  const roleNav =
+    user?.papel === 'ALUNO' ? NAV_ALUNO :
+    user?.papel === 'PROFESSOR' ? NAV_PROFESSOR :
+    user?.papel === 'EMPRESA_PARCEIRA' ? NAV_EMPRESA : []
+
+  const roleLabel =
+    user?.papel === 'ALUNO' ? 'Aluno' :
+    user?.papel === 'PROFESSOR' ? 'Professor' :
+    user?.papel === 'EMPRESA_PARCEIRA' ? 'Empresa Parceira' : ''
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        width={220}
-        style={{ position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 100, overflow: 'auto' }}
-        theme="dark"
-      >
-        <div style={{
-          height: 64,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '0 20px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-        }}>
-          <Avatar
-            size={32}
-            style={{ background: '#1677ff', flexShrink: 0 }}
-            icon={<TrophyOutlined />}
-          />
-          <div style={{ overflow: 'hidden' }}>
-            <Typography.Text strong style={{ color: '#fff', fontSize: 13, display: 'block', lineHeight: '18px' }}>
-              Moeda Estudantil
-            </Typography.Text>
-            <Typography.Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11 }}>
-              Sistema de Méritos
-            </Typography.Text>
+    <div className="app-layout">
+      {/* ── Sidebar ── */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <div className="sidebar-emblem">🏛️</div>
+          <div className="sidebar-logo-title">Casa da Moeda</div>
+          <div className="sidebar-logo-sub">Mérito Estudantil</div>
+        </div>
+
+        <nav className="sidebar-nav">
+          <div className="nav-section-label">Sistema</div>
+          {NAV_COMMON.map((item) => (
+            <NavLink key={item.to} to={item.to} end={item.to === '/'} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{item.icon}</span>
+              {item.label}
+            </NavLink>
+          ))}
+
+          {roleNav.length > 0 && (
+            <>
+              <div className="nav-section-label" style={{ marginTop: 'var(--space-3)' }}>
+                {user?.papel === 'ALUNO' ? 'Minha Conta' : user?.papel === 'PROFESSOR' ? 'Professor' : 'Empresa'}
+              </div>
+              {roleNav.map((item) => (
+                <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{item.icon}</span>
+                  {item.label}
+                </NavLink>
+              ))}
+            </>
+          )}
+
+          <div className="nav-section-label" style={{ marginTop: 'var(--space-3)' }}>Administração</div>
+          {NAV_ADMIN.map((item) => (
+            <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{item.icon}</span>
+              {item.label}
+            </NavLink>
+          ))}
+
+          <div className="nav-section-label" style={{ marginTop: 'var(--space-3)' }}>Documentação</div>
+          {NAV_SYSTEM.map((item) => (
+            <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>{item.icon}</span>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <div style={{ fontFamily: 'var(--font-heading)', fontSize: '0.78rem', color: 'var(--text-primary)', marginBottom: 4 }}>
+              {user?.nome ?? user?.email}
+            </div>
+            <span className={`user-role-badge role-${user?.papel}`}>{roleLabel}</span>
+          </div>
+          {user?.papel === 'ALUNO' && user.saldoMoedas !== undefined && (
+            <div className="coin-display" style={{ marginBottom: 'var(--space-3)' }}>
+              <div className="coin-icon">⬡</div>
+              <span className="coin-amount" style={{ fontSize: '1rem' }}>{user.saldoMoedas} moedas</span>
+            </div>
+          )}
+          <button className="btn btn-ghost btn-sm" style={{ width: '100%' }} onClick={handleLogout}>
+            ↩ Sair
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Main ── */}
+      <main className="main-content">
+        <div className="top-bar">
+          <div className="top-bar-breadcrumb">
+            <span>CASA DA MOEDA</span>
+            <span style={{ color: 'var(--border-gold)' }}>›</span>
+            <span>Sistema de Mérito Estudantil</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            {user?.papel === 'ALUNO' && (
+              <div className="coin-display">
+                <div className="coin-icon">⬡</div>
+                <span className="coin-amount" style={{ fontSize: '0.95rem' }}>{user.saldoMoedas ?? 0}</span>
+              </div>
+            )}
+            {user?.papel === 'PROFESSOR' && (
+              <div className="coin-display">
+                <div className="coin-icon">⬡</div>
+                <span className="coin-amount" style={{ fontSize: '0.95rem' }}>{user.saldoMoedas ?? 0} disponíveis</span>
+              </div>
+            )}
           </div>
         </div>
 
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          items={menuItems}
-          onClick={({ key }) => navigate(key)}
-          style={{ marginTop: 8 }}
-        />
-      </Sider>
-
-      <Layout style={{ marginLeft: 220 }}>
-        <Header style={{
-          background: '#fff',
-          padding: '0 24px',
-          display: 'flex',
-          alignItems: 'center',
-          borderBottom: '1px solid #f0f0f0',
-          position: 'sticky',
-          top: 0,
-          zIndex: 99,
-          boxShadow: '0 1px 4px rgba(0,21,41,0.08)',
-        }}>
-          <Typography.Text style={{ color: '#666', fontSize: 13 }}>
-            Laboratório de Desenvolvimento de Software — Release 1
-          </Typography.Text>
-        </Header>
-
-        <Content style={{ padding: 24, minHeight: 'calc(100vh - 64px - 48px)' }}>
+        <div className="page-content">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/students" element={<StudentListPage />} />
@@ -94,23 +171,60 @@ function AppShell() {
             <Route path="/companies" element={<CompanyListPage />} />
             <Route path="/companies/new" element={<CompanyFormPage />} />
             <Route path="/companies/:id/edit" element={<CompanyFormPage />} />
+            <Route path="/professors" element={<ProfessorListPage />} />
+            <Route path="/transfer" element={<TransferPage />} />
+            <Route path="/perks" element={<PerksPage />} />
+            <Route path="/statement" element={<StatementPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/design-system" element={<DesignSystemPage />} />
+            <Route path="/slides" element={<SlidesPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Content>
-
-        <Footer style={{ textAlign: 'center', color: '#999', fontSize: 12, padding: '12px 24px' }}>
-          PUC Minas — Sistema de Moeda Estudantil © 2025
-        </Footer>
-      </Layout>
-    </Layout>
+        </div>
+      </main>
+    </div>
   )
 }
 
-function App() {
+// ── Protected Route ───────────────────────────────────────────────
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth()
+  if (isLoading) return (
+    <div className="loading-screen" style={{ minHeight: '100vh' }}>
+      <div className="spinner" />
+      <span>Verificando credenciais...</span>
+    </div>
+  )
+  if (!user) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+// ── Root ──────────────────────────────────────────────────────────
+export default function App() {
   return (
-    <BrowserRouter>
-      <AppShell />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-gold)',
+              fontFamily: 'var(--font-body)',
+            },
+          }}
+        />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/*" element={
+            <RequireAuth>
+              <AppLayout />
+            </RequireAuth>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
-
-export default App

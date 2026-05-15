@@ -1,9 +1,10 @@
 node_modules/
 dist/
 
-# Env — use .env.example as template
+# Env files — use .env.example as template
 .env
-.env.local
+.env.*
+!.env.example
 
 # Prisma generated client (regenerated via prisma generate)
 node_modules/.prisma/
