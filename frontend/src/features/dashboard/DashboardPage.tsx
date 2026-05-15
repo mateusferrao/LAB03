@@ -254,6 +254,7 @@ function AdminOverview() {
 
 export function DashboardPage() {
   const { user } = useAuth()
+  const showAdminOverview = user?.papel !== 'ALUNO'
 
   return (
     <div>
@@ -275,11 +276,11 @@ export function DashboardPage() {
         </div>
       </div>
 
-      <AdminOverview />
+      {showAdminOverview && <AdminOverview />}
 
-      {(user?.papel === 'ALUNO' || user?.papel === 'PROFESSOR' || user?.papel === 'EMPRESA_PARCEIRA') && (
+      {showAdminOverview && (user?.papel === 'PROFESSOR' || user?.papel === 'EMPRESA_PARCEIRA') && (
         <div className="ornamental-divider mt-6 mb-6">
-          {user?.papel === 'ALUNO' ? 'Meu Painel' : user?.papel === 'PROFESSOR' ? 'Painel do Professor' : 'Painel da Empresa'}
+          {user?.papel === 'PROFESSOR' ? 'Painel do Professor' : 'Painel da Empresa'}
         </div>
       )}
 
