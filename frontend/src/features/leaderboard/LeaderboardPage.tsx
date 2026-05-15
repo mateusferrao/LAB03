@@ -65,9 +65,9 @@ export function LeaderboardPage() {
             }}>
               {/* Render order: 2nd, 1st, 3rd for visual podium shape */}
               {[
-                top3[1] ? { ...top3[1], visualOrder: 0, height: 200 } : null,
-                top3[0] ? { ...top3[0], visualOrder: 1, height: 240 } : null,
-                top3[2] ? { ...top3[2], visualOrder: 2, height: 170 } : null,
+                top3[1] ? { ...top3[1], visualOrder: 0 } : null,
+                top3[0] ? { ...top3[0], visualOrder: 1 } : null,
+                top3[2] ? { ...top3[2], visualOrder: 2 } : null,
               ].filter(Boolean).map((entry) => {
                 if (!entry) return null
                 const idx = entry.posicao - 1
@@ -80,24 +80,32 @@ export function LeaderboardPage() {
                     borderRadius: 'var(--radius-lg)',
                     padding: 'var(--space-5)',
                     textAlign: 'center',
-                    height: entry.height,
-                    display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+                    minHeight: 270,
+                    display: 'grid',
+                    gridTemplateRows: 'auto 1fr auto',
+                    alignItems: 'center',
                     gap: 'var(--space-2)',
                     boxShadow: `0 0 32px ${color.border}22`,
                     order: entry.visualOrder,
                   }}>
-                    <div style={{ fontSize: '2rem', marginBottom: 'var(--space-1)' }}>{color.icon}</div>
-                    <RankBadge pos={entry.posicao} />
-                    <div style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', color: color.text, marginTop: 'var(--space-2)', fontWeight: 700 }}>
-                      {entry.nome}
+                    <div>
+                      <div style={{ fontSize: '2rem', marginBottom: 'var(--space-1)' }}>{color.icon}</div>
+                      <RankBadge pos={entry.posicao} />
                     </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      {entry.curso}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 110 }}>
+                      <div style={{ fontFamily: 'var(--font-heading)', fontSize: '0.95rem', color: color.text, fontWeight: 700, lineHeight: 1.35 }}>
+                        {entry.nome}
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
+                        {entry.curso}
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginTop: 'var(--space-2)' }}>
+                        {entry.instituicao}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                      {entry.instituicao}
-                    </div>
-                    <div style={{ marginTop: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-2)' }}>
                       <span style={{ color: color.text, fontSize: '1rem' }}>⬡</span>
                       <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', color: color.text }}>{entry.saldoMoedas}</span>
                     </div>

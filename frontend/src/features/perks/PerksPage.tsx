@@ -41,12 +41,18 @@ function AlunoPerks() {
 
   function handleRedeem(v: Vantagem) {
     if (v.custoMoedas > saldo) return toast.error('Saldo insuficiente para resgatar esta vantagem')
-    if (!window.confirm(`Resgatar "${v.nome}" por ⬡ ${v.custoMoedas} moedas?`)) return
+    setConfirmRedeem(v)
+  }
 
-    setRedeeming(v.id)
+  async function confirmRedeemRequest() {
+    if (!confirmRedeem) return
+    const vantagem = confirmRedeem
+
+    setRedeeming(vantagem.id)
     try {
-      const { data: resgate } = await api.post<Resgate>('/resgates', { vantagemId: v.id })
-      setCouponModal({ vantagem: v, resgate })
+      const { data: resgate } = await api.post<Resgate>('/resgates', { vantagemId: vantagem.id })
+      setConfirmRedeem(null)
+      setCouponModal({ vantagem, resgate })
       await refreshMe()
       toast.success('Vantagem resgatada! Guarde seu cupom.')
     } catch (err: any) {
@@ -140,6 +146,74 @@ function AlunoPerks() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {confirmRedeem && (
+        <div className="modal-overlay" onClick={() => !redeeming && setConfirmRedeem(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460, padding: 'var(--space-6)' }}>
+            <button className="modal-close" onClick={() => setConfirmRedeem(null)} disabled={!!redeeming}>×</button>
+
+            <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
+              <div style={{
+                width: 92, height: 92, borderRadius: 'var(--radius-lg)', overflow: 'hidden',
+                background: 'var(--bg-elevated)', border: '1px solid var(--border-gold)', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {confirmRedeem.urlFoto ? (
+                  <img src={confirmRedeem.urlFoto} alt={confirmRedeem.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ fontSize: '2rem', color: 'var(--gold-500)' }}>⬡</div>
+                )}
+              </div>
+
+              <div style={{ minWidth: 0 }}>
+                <div className="modal-title" style={{ marginBottom: 'var(--space-2)' }}>Confirmar resgate</div>
+                <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', fontSize: '1.05rem', marginBottom: 4 }}>
+                  {confirmRedeem.nome}
+                </div>
+                {confirmRedeem.empresa && (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>
+                    {confirmRedeem.empresa.nome}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginTop: 'var(--space-5)' }}>
+              Deseja confirmar este resgate? O valor será debitado do seu saldo e um cupom será gerado para uso na empresa parceira.
+            </div>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)',
+              marginTop: 'var(--space-5)', padding: 'var(--space-4)',
+              background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)',
+            }}>
+              <div>
+                <div className="stat-label">Custo</div>
+                <div className="coin-display" style={{ marginTop: 4 }}>
+                  <div className="coin-icon">⬡</div>
+                  <span className="coin-amount">{confirmRedeem.custoMoedas}</span>
+                </div>
+              </div>
+              <div>
+                <div className="stat-label">Saldo após</div>
+                <div className="coin-display" style={{ marginTop: 4 }}>
+                  <div className="coin-icon">⬡</div>
+                  <span className="coin-amount">{saldo - confirmRedeem.custoMoedas}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4" style={{ justifyContent: 'flex-end', marginTop: 'var(--space-6)', flexWrap: 'wrap' }}>
+              <button className="btn btn-ghost" onClick={() => setConfirmRedeem(null)} disabled={!!redeeming}>
+                Cancelar
+              </button>
+              <button className="btn btn-crimson" onClick={confirmRedeemRequest} disabled={redeeming === confirmRedeem.id}>
+                {redeeming === confirmRedeem.id ? 'Resgatando...' : 'Confirmar resgate'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -374,3 +448,4 @@ export function PerksPage() {
   if (user?.papel === 'EMPRESA_PARCEIRA') return <EmpresaPerks />
   return <ReadonlyPerks />
 }
+
