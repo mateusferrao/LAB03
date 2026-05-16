@@ -269,21 +269,37 @@ function EmpresaPerks() {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.nome.trim()) return toast.error('Nome é obrigatório')
+    const nome = form.nome.trim()
+    const descricao = form.descricao.trim()
+    const urlFoto = form.urlFoto.trim()
+
+    if (!nome) return toast.error('Nome é obrigatório')
+    if (descricao.length < 10) return toast.error('Descrição deve ter pelo menos 10 caracteres')
+    if (urlFoto) {
+      try {
+        new URL(urlFoto)
+      } catch {
+        return toast.error('URL da imagem inválida')
+      }
+    }
     const custo = Number(form.custoMoedas)
-    if (!custo || custo <= 0) return toast.error('Custo inválido')
+    if (!Number.isInteger(custo) || custo <= 0) return toast.error('Custo inválido')
 
     setAdding(true)
     try {
       const { data } = await api.post<Vantagem>(`/vantagens/empresa/${user?.id}`, {
-        nome: form.nome, descricao: form.descricao, urlFoto: form.urlFoto, custoMoedas: custo,
+        nome, descricao, urlFoto, custoMoedas: custo,
       })
       setVantagens((prev) => [...prev, data])
       setForm({ nome: '', descricao: '', urlFoto: '', custoMoedas: '' })
       setShowForm(false)
       toast.success('Vantagem adicionada')
     } catch (err: any) {
-      toast.error(err.response?.data?.error ?? 'Erro ao adicionar vantagem')
+      const details = err.response?.data?.details
+      const detailMessage = Array.isArray(details) && details.length > 0
+        ? `${details[0].campo}: ${details[0].mensagem}`
+        : null
+      toast.error(detailMessage ?? err.response?.data?.error ?? 'Erro ao adicionar vantagem')
     } finally {
       setAdding(false)
     }
