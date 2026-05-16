@@ -8,7 +8,6 @@ Este projeto foi desenvolvido como trabalho prático da disciplina de **Projeto 
 
 ## 🚧 Status do Projeto
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
 ![License](https://img.shields.io/badge/license-academic-lightgrey)
 ![React](https://img.shields.io/badge/React-19.2.5-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-8.0.10-646CFF?logo=vite)
@@ -613,15 +612,6 @@ O projeto possui documentação complementar em `docs/`:
 - 📖 [JWT Introduction](https://jwt.io/introduction) - Autenticação baseada em tokens
 - 📖 [Conventional Commits](https://www.conventionalcommits.org/) - Padrão de commits
 - 📖 [PlantUML Documentation](https://plantuml.com/) - Diagramas do projeto
-
----
-
-## 👥 Autores
-
-| Nome | GitHub | Contexto |
-|---|---|---|
-| **Felipe Giannetti Fontenelle** | [@felipegiannetti](https://github.com/felipegiannetti) | Desenvolvimento acadêmico |
-| **Equipe LAB03** | [Repositório do projeto](https://github.com/mateusferrao/LAB03) | Projeto da disciplina |
 
 ---
 
