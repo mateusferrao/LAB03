@@ -586,15 +586,6 @@ O projeto possui documentação complementar em `docs/`:
 
 ---
 
-## 👥 Autores
-
-| Nome | GitHub | Contexto |
-|---|---|---|
-| **Felipe Giannetti Fontenelle** | [@felipegiannetti](https://github.com/felipegiannetti) | Desenvolvimento acadêmico |
-| **Equipe LAB03** | [Repositório do projeto](https://github.com/mateusferrao/LAB03) | Projeto da disciplina |
-
----
-
 ## 🤝 Contribuição
 
 Contribuições são bem-vindas para evolução acadêmica do projeto:
