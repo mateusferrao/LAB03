@@ -4,9 +4,9 @@
   "description": "Sistema de Moeda Estudantil — Backend",
   "main": "dist/interfaces/app.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/interfaces/app.ts",
+    "dev": "node --use-system-ca ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/interfaces/app.ts",
     "build": "tsc",
-    "start": "node dist/interfaces/app.js",
+    "start": "node --use-system-ca dist/interfaces/app.js",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:seed": "node prisma/seed.js",

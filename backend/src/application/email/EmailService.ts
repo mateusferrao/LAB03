@@ -20,27 +20,33 @@ export class EmailService {
 
   async send(input: EmailSendInput): Promise<void> {
     if (!this.isConfigured()) {
+      console.warn('[EMAIL FALLBACK] EmailJS nao configurado. Verifique EMAILJS_SERVICE_ID e EMAILJS_PUBLIC_KEY no backend/.env.')
       this.logFallback(input)
       return
     }
 
     try {
+      const payload: Record<string, unknown> = {
+        service_id: this.serviceId,
+        template_id: input.templateId,
+        user_id: this.publicKey,
+        template_params: input.params,
+      }
+
+      if (this.privateKey) payload.accessToken = this.privateKey
+
       const response = await fetch(EMAILJS_SEND_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service_id: this.serviceId,
-          template_id: input.templateId,
-          user_id: this.publicKey,
-          accessToken: this.privateKey,
-          template_params: input.params,
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
         const details = await response.text()
         throw new Error(`EmailJS respondeu ${response.status}: ${details}`)
       }
+
+      console.log(`[EMAILJS] Email enviado para ${input.fallbackTo} usando template ${input.templateId}`)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'erro desconhecido'
       console.warn(`[EMAIL FALLBACK] Falha ao enviar via EmailJS: ${message}`)
@@ -71,6 +77,7 @@ export class EmailService {
     }
 
     if (!templateAlunoId || !templateProfessorId) {
+      console.warn('[EMAIL FALLBACK] Templates EmailJS ausentes. Verifique EMAILJS_TEMPLATE_ALUNO_ID e EMAILJS_TEMPLATE_PROFESSOR_ID no backend/.env.')
       this.logFallback({
         templateId: templateAlunoId ?? 'EMAILJS_TEMPLATE_ALUNO_ID',
         fallbackTo: input.alunoEmail,

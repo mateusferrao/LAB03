@@ -291,7 +291,13 @@ O remetente real será o serviço conectado no painel do EmailJS. Os emails cada
 4. Copie o `Service ID` do serviço conectado para `EMAILJS_SERVICE_ID`.
 5. Copie a `Public Key` da conta para `EMAILJS_PUBLIC_KEY`.
 6. Opcionalmente, copie a `Private Key` para `EMAILJS_PRIVATE_KEY`. Ela pode ser exigida conforme as configurações de segurança da conta.
-7. Se o envio for feito pelo backend, habilite o uso da API para aplicações fora do navegador nas configurações do EmailJS, quando essa opção aparecer no painel.
+7. Como o envio é feito pelo backend, acesse **Account > Security** no EmailJS e habilite a opção de acesso pela API fora do navegador. No painel, a mensagem costuma aparecer como **API access from non-browser environments**.
+
+Se o backend mostrar o erro abaixo, a opção do passo 7 ainda está desativada:
+
+```text
+EmailJS respondeu 403: API access from non-browser environments is currently disabled
+```
 
 Exemplo de campos do template do aluno:
 
