@@ -98,7 +98,7 @@ O **Sistema de Moeda Estudantil** tem como objetivo incentivar o mérito acadêm
 - ⚡ **SPA Responsiva:** Interface React com Vite, React Router e feedback por toast
 - 🧪 **Seed de Demonstração:** Dados iniciais para instituições, professores, alunos, empresas e vantagens
 
-> Observação: as notificações por email estão representadas no protótipo por logs no console do back-end.
+> Observação: as notificações por email usam EmailJS quando configurado. Sem as chaves no `.env`, o back-end registra os emails no console para manter a demonstração funcionando.
 
 ---
 
@@ -265,6 +265,56 @@ Conteúdo esperado:
 DATABASE_URL="file:./dev.db"
 JWT_SECRET="troque_este_segredo_em_producao"
 PORT=3000
+
+# EmailJS opcional. Sem essas chaves, os emails aparecem no console do backend.
+EMAILJS_SERVICE_ID=""
+EMAILJS_PUBLIC_KEY=""
+EMAILJS_PRIVATE_KEY=""
+EMAILJS_TEMPLATE_ALUNO_ID=""
+EMAILJS_TEMPLATE_PROFESSOR_ID=""
+```
+
+Para o Lab04S01, crie dois templates no EmailJS:
+
+| Template | Variáveis usadas |
+|---|---|
+| Aluno | `to_email`, `to_name`, `reply_to`, `aluno_nome`, `professor_nome`, `professor_email`, `valor`, `motivo`, `realizada_em` |
+| Professor | `to_email`, `to_name`, `reply_to`, `aluno_nome`, `aluno_email`, `professor_nome`, `valor`, `motivo`, `realizada_em` |
+
+O remetente real será o serviço conectado no painel do EmailJS. Os emails cadastrados no sistema são usados como destinatário, resposta e conteúdo dos templates.
+
+### Configuração do EmailJS
+
+1. Acesse o painel do EmailJS e conecte um serviço de email, por exemplo Gmail, Outlook ou outro provedor aceito.
+2. Crie o template de recebimento do aluno e copie o `Template ID` para `EMAILJS_TEMPLATE_ALUNO_ID`.
+3. Crie o template de confirmação do professor e copie o `Template ID` para `EMAILJS_TEMPLATE_PROFESSOR_ID`.
+4. Copie o `Service ID` do serviço conectado para `EMAILJS_SERVICE_ID`.
+5. Copie a `Public Key` da conta para `EMAILJS_PUBLIC_KEY`.
+6. Opcionalmente, copie a `Private Key` para `EMAILJS_PRIVATE_KEY`. Ela pode ser exigida conforme as configurações de segurança da conta.
+7. Se o envio for feito pelo backend, habilite o uso da API para aplicações fora do navegador nas configurações do EmailJS, quando essa opção aparecer no painel.
+
+Exemplo de campos do template do aluno:
+
+```text
+Para: {{to_email}}
+Assunto: Você recebeu {{valor}} moedas
+
+Olá {{aluno_nome}},
+Você recebeu {{valor}} moedas de {{professor_nome}}.
+Motivo: {{motivo}}
+Data: {{realizada_em}}
+```
+
+Exemplo de campos do template do professor:
+
+```text
+Para: {{to_email}}
+Assunto: Envio de moedas confirmado
+
+Olá {{professor_nome}},
+Seu envio de {{valor}} moedas para {{aluno_nome}} foi confirmado.
+Motivo: {{motivo}}
+Data: {{realizada_em}}
 ```
 
 Gere o Prisma Client, aplique as migrations e execute o seed:
@@ -512,6 +562,7 @@ LAB03/
 | Método | Rota | Proteção | Descrição |
 |---|---|---|---|
 | `POST` | `/transfers` | Professor | Envia moedas para aluno |
+| `GET` | `/transfers/me` | Professor/Aluno | Consulta o extrato de moedas do usuário autenticado |
 | `GET` | `/transfers/professor/:id` | JWT | Lista transferências por professor |
 | `GET` | `/transfers/aluno/:id` | JWT | Lista transferências recebidas pelo aluno |
 | `GET` | `/vantagens` | Pública | Lista vantagens disponíveis |
@@ -520,6 +571,8 @@ LAB03/
 | `PUT` | `/vantagens/:id` | Empresa | Atualiza vantagem |
 | `DELETE` | `/vantagens/:id` | Empresa | Remove vantagem |
 | `POST` | `/resgates` | Aluno | Resgata vantagem e gera cupom |
+| `GET` | `/resgates/aluno/me` | Aluno | Lista resgates do aluno autenticado |
+| `GET` | `/resgates/empresa/me` | Empresa | Lista resgates da empresa autenticada |
 | `GET` | `/resgates/aluno/:id` | JWT | Lista resgates do aluno |
 | `GET` | `/resgates/empresa/:id` | JWT | Lista resgates da empresa |
 | `GET` | `/leaderboard` | Pública | Lista ranking de alunos |
@@ -528,6 +581,19 @@ LAB03/
 ---
 
 ## 🎥 Demonstração
+
+### Release 02 - Lab04S01
+
+Esta sprint implementa os casos de uso de envio de moedas e consulta de extrato para professores e alunos:
+
+- Professor envia moedas para um aluno com motivo obrigatório.
+- A operação valida saldo suficiente e usa transação no banco para manter os saldos consistentes.
+- O aluno visualiza moedas recebidas no extrato.
+- O professor visualiza moedas enviadas no extrato.
+- O aluno recebe email de recebimento via EmailJS.
+- O professor recebe email de confirmação via EmailJS.
+- Quando o EmailJS não está configurado, o backend imprime os dois emails no console para permitir a demonstração em laboratório ou vídeo.
+- Os endpoints de extrato usam o usuário autenticado (`/transfers/me`), evitando consulta indevida de dados de outro usuário.
 
 ### 🌐 Aplicação Web
 
@@ -551,11 +617,12 @@ LAB03/
 1. Faça login como professor: `falbo@prof.com` / `123456`
 2. Acesse **Enviar Moedas**
 3. Escolha um aluno, informe o valor e descreva o motivo
-4. Saia e faça login como aluno: `ana@aluno.com` / `123456`
-5. Consulte o **Extrato** e o **Catálogo de Vantagens**
-6. Resgate uma vantagem caso haja saldo suficiente
-7. Faça login como empresa: `cantina@parceiro.com` / `123456`
-8. Consulte vantagens cadastradas e resgates recebidos
+4. Confira o email de confirmação do professor e o email de recebimento do aluno, ou os logs no console se o EmailJS não estiver configurado
+5. Saia e faça login como aluno: `ana@aluno.com` / `123456`
+6. Consulte o **Extrato** e o **Catálogo de Vantagens**
+7. Resgate uma vantagem caso haja saldo suficiente
+8. Faça login como empresa: `cantina@parceiro.com` / `123456`
+9. Consulte vantagens cadastradas e resgates recebidos
 
 ---
 

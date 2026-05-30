@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
-import type { Transferencia, Resgate } from '../../types'
+import type { Transferencia, Resgate, TransferStatement } from '../../types'
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -15,8 +15,8 @@ function ProfessorStatement() {
 
   useEffect(() => {
     if (!user?.id) return
-    api.get<Transferencia[]>(`/transfers/professor/${user.id}`)
-      .then(({ data }) => setTransfers(data))
+    api.get<TransferStatement>('/transfers/me')
+      .then(({ data }) => setTransfers(data.transferencias))
       .catch(() => toast.error('Erro ao carregar extrato'))
       .finally(() => setLoading(false))
   }, [user?.id])
@@ -112,11 +112,11 @@ function AlunoStatement() {
   useEffect(() => {
     if (!user?.id) return
     Promise.all([
-      api.get<Transferencia[]>(`/transfers/aluno/${user.id}`),
-      api.get<Resgate[]>(`/resgates/aluno/${user.id}`),
+      api.get<TransferStatement>('/transfers/me'),
+      api.get<Resgate[]>('/resgates/aluno/me'),
     ])
       .then(([{ data: t }, { data: r }]) => {
-        setTransfers(t)
+        setTransfers(t.transferencias)
         setResgates(r)
       })
       .catch(() => toast.error('Erro ao carregar extrato'))
@@ -295,7 +295,7 @@ function EmpresaStatement() {
 
   useEffect(() => {
     if (!user?.id) return
-    api.get<Resgate[]>(`/resgates/empresa/${user.id}`)
+    api.get<Resgate[]>('/resgates/empresa/me')
       .then(({ data }) => setResgates(data))
       .catch(() => toast.error('Erro ao carregar resgates'))
       .finally(() => setLoading(false))

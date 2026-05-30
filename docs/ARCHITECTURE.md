@@ -61,12 +61,12 @@ src/
 │   └── interfaces/       # IRepository<T>, INotificationService
 ├── application/          # Use case orchestration
 │   ├── auth/             # AuthService
-│   ├── coins/            # CoinService (sendCoins, getSemesterBalance)
-│   ├── perks/            # PerkService (redeemPerk, listPerks)
-│   └── notifications/    # NotificationService (email dispatch)
+│   ├── transfer/         # TransferService (sendCoins, statement)
+│   ├── resgate/          # ResgateService (redeemPerk, list redemptions)
+│   ├── vantagem/         # VantagemService (perk catalog)
+│   └── email/            # EmailService (EmailJS + console fallback)
 ├── infrastructure/       # Framework-specific implementations
-│   ├── repositories/     # Prisma/TypeORM implementations of IRepository<T>
-│   ├── email/            # NodeMailer adapter
+│   ├── repositories/     # Prisma implementations of IRepository<T>
 │   └── database/         # DB connection, migrations
 └── interfaces/           # HTTP layer
     ├── controllers/       # Thin — delegate to application services
@@ -115,13 +115,12 @@ async sendCoins(professorId: string, dto: SendCoinsDto): Promise<CoinTransfer> {
 }
 ```
 
-#### Observer / Event Pattern
-`NotificationService` decouples email sending from business logic. Services emit domain events; notification service subscribes and sends emails.
+#### Email Service Pattern
+`EmailService` decouples email sending from business logic. `TransferService` persists the coin transfer transaction first, then asks `EmailService` to send the student and professor templates through EmailJS. If EmailJS variables are not configured, the same payload is logged to the backend console for lab demonstration.
 
 ```typescript
-interface INotificationService {
-  notifyStudentCoinReceived(student: Student, transfer: CoinTransfer): Promise<void>
-  notifyRedemption(student: Student, company: PartnerCompany, redemption: Redemption): Promise<void>
+interface EmailService {
+  sendTransferEmails(input: TransferEmailInput): Promise<void>
 }
 ```
 
@@ -237,7 +236,7 @@ function useSendCoins() {
 - `IRepository<T>` — generic CRUD contract, all domain types implement
 - `Transaction` (abstract) — unified statement model for both CoinTransfer and Redemption
 - `User` (abstract) — shared auth fields; role-specific data in subclasses
-- `INotificationService` — email sending contract, adapter-swappable
+- `EmailService` — EmailJS REST API integration with console fallback for demos
 - `SendCoinsDto / RedeemPerkDto` — validated boundary objects, prevent raw request objects from leaking inward
 
 ---

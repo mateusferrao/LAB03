@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../../services/api'
+import { getApiErrorMessage } from '../../services/getApiErrorMessage'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
 import type { Vantagem, Resgate } from '../../types'
@@ -55,8 +56,8 @@ function AlunoPerks() {
       setCouponModal({ vantagem, resgate })
       await refreshMe()
       toast.success('Vantagem resgatada! Guarde seu cupom.')
-    } catch (err: any) {
-      toast.error(err.response?.data?.error ?? 'Erro ao resgatar vantagem')
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Erro ao resgatar vantagem'))
     } finally {
       setRedeeming(null)
     }
@@ -294,12 +295,8 @@ function EmpresaPerks() {
       setForm({ nome: '', descricao: '', urlFoto: '', custoMoedas: '' })
       setShowForm(false)
       toast.success('Vantagem adicionada')
-    } catch (err: any) {
-      const details = err.response?.data?.details
-      const detailMessage = Array.isArray(details) && details.length > 0
-        ? `${details[0].campo}: ${details[0].mensagem}`
-        : null
-      toast.error(detailMessage ?? err.response?.data?.error ?? 'Erro ao adicionar vantagem')
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Erro ao adicionar vantagem'))
     } finally {
       setAdding(false)
     }

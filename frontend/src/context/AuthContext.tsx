@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import type { UsuarioAuth } from '../types'
@@ -15,20 +16,16 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UsuarioAuth | null>(null)
-  const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<UsuarioAuth | null>(() => {
+    const savedUser = localStorage.getItem('cdm_user')
+    return savedUser ? JSON.parse(savedUser) : null
+  })
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('cdm_token'))
+  const isLoading = false
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('cdm_token')
-    const savedUser = localStorage.getItem('cdm_user')
-    if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
-      api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`
-    }
-    setIsLoading(false)
-  }, [])
+    if (token) api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  }, [token])
 
   async function login(email: string, senha: string) {
     const { data } = await api.post('/auth/login', { email, senha })

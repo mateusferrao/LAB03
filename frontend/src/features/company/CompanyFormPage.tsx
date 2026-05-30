@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import api from '../../services/api'
+import { getApiErrorMessage } from '../../services/getApiErrorMessage'
 import toast from 'react-hot-toast'
 import type { EmpresaParceira, Vantagem } from '../../types'
 
@@ -30,7 +31,7 @@ export function CompanyFormPage() {
       })
       .catch(() => toast.error('Erro ao carregar empresa'))
       .finally(() => setLoading(false))
-  }, [id])
+  }, [id, isEdit])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
@@ -57,8 +58,8 @@ export function CompanyFormPage() {
         toast.success('Empresa cadastrada com sucesso')
       }
       navigate('/companies')
-    } catch (err: any) {
-      toast.error(err.response?.data?.error ?? 'Erro ao salvar empresa')
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Erro ao salvar empresa'))
     } finally {
       setSubmitting(false)
     }
@@ -81,8 +82,8 @@ export function CompanyFormPage() {
       setVantagemForm({ nome: '', descricao: '', urlFoto: '', custoMoedas: '' })
       setShowVantagemForm(false)
       toast.success('Vantagem adicionada')
-    } catch (err: any) {
-      toast.error(err.response?.data?.error ?? 'Erro ao adicionar vantagem')
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Erro ao adicionar vantagem'))
     } finally {
       setAddingVantagem(false)
     }

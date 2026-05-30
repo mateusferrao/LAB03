@@ -76,6 +76,13 @@ export interface Transferencia {
   realizadaEm: string
 }
 
+export interface TransferStatement {
+  saldoMoedas: number
+  professor?: Pick<Professor, 'id' | 'nome' | 'saldoMoedas'>
+  aluno?: Pick<Aluno, 'id' | 'nome' | 'saldoMoedas'>
+  transferencias: Transferencia[]
+}
+
 export interface Resgate {
   id: string
   alunoId: string

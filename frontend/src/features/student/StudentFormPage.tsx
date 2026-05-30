@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import api from '../../services/api'
+import { getApiErrorMessage } from '../../services/getApiErrorMessage'
 import toast from 'react-hot-toast'
 import type { Aluno, Instituicao } from '../../types'
 
@@ -45,7 +46,7 @@ export function StudentFormPage() {
     } else {
       loadInstitutions.finally(() => setLoading(false))
     }
-  }, [id])
+  }, [id, isEdit])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
@@ -73,9 +74,8 @@ export function StudentFormPage() {
         toast.success('Aluno cadastrado com sucesso')
       }
       navigate('/students')
-    } catch (err: any) {
-      const msg = err.response?.data?.error ?? 'Erro ao salvar aluno'
-      toast.error(msg)
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Erro ao salvar aluno'))
     } finally {
       setSubmitting(false)
     }

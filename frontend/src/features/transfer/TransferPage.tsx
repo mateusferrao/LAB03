@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../../services/api'
+import { getApiErrorMessage } from '../../services/getApiErrorMessage'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
 import type { Aluno } from '../../types'
@@ -44,8 +45,8 @@ export function TransferPage() {
       setMotivo('')
       await refreshMe()
       toast.success(`⬡ ${v} moedas enviadas com sucesso!`)
-    } catch (err: any) {
-      toast.error(err.response?.data?.error ?? 'Erro ao enviar moedas')
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Erro ao enviar moedas'))
     } finally {
       setSubmitting(false)
     }

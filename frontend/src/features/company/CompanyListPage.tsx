@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -10,9 +10,7 @@ export function CompanyListPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
-  useEffect(() => { load() }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     try {
       setLoading(true)
       const { data } = await api.get<EmpresaParceira[]>('/companies')
@@ -22,7 +20,10 @@ export function CompanyListPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load() }, [load])
 
   async function handleDelete(company: EmpresaParceira) {
     if (!window.confirm(`Deseja excluir "${company.nome}"? Todas as vantagens serão removidas.`)) return

@@ -19,3 +19,18 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Dependencies and build outputs
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+*.tsbuildinfo
+
+# Local database runtime artifacts
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Local dev server captures
+backend-dev*.log

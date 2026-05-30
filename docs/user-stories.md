@@ -29,6 +29,8 @@
 - Motivo é campo obrigatório (texto livre)
 - Saldo do professor é decrementado imediatamente
 - Aluno recebe email de notificação com nome do professor, valor e motivo
+- Professor recebe email de confirmação com aluno, valor e motivo
+- Transferência fica disponível no extrato do professor e do aluno autenticados
 
 ---
 
@@ -38,6 +40,7 @@
 **Critérios de aceitação:**
 - Email disparado automaticamente após transferência confirmada
 - Email inclui: remetente, valor, motivo, saldo atual
+- No ambiente de protótipo, se o EmailJS não estiver configurado, o mesmo conteúdo é registrado no console do back-end
 
 ---
 

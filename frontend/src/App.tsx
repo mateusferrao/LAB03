@@ -181,7 +181,7 @@ function AppLayout() {
             <Route path="/companies/new" element={<RequireRole roles={CAN_VIEW_ADMIN}><CompanyFormPage /></RequireRole>} />
             <Route path="/companies/:id/edit" element={<RequireRole roles={CAN_VIEW_ADMIN}><CompanyFormPage /></RequireRole>} />
             <Route path="/professors" element={<RequireRole roles={CAN_VIEW_ADMIN}><ProfessorListPage /></RequireRole>} />
-            <Route path="/transfer" element={<TransferPage />} />
+            <Route path="/transfer" element={<RequireRole roles={['PROFESSOR']}><TransferPage /></RequireRole>} />
             <Route path="/perks" element={<PerksPage />} />
             <Route path="/statement" element={<StatementPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
